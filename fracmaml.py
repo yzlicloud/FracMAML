@@ -56,15 +56,11 @@ def meta_gradient_step(model: Module,
     task_predictions = []
     index_meta_batch=0
     for meta_batch in x:
-        # By construction x is a 5D tensor of shape: (meta_batch_size, n*k + q*k, channels, width, height)
-        # Hence when we iterate over the first  dimension we are iterating through the meta batches
         x_task_train = meta_batch[:n_shot * k_way]
         x_task_val = meta_batch[n_shot * k_way:]
 
-        # Create a fast model using the current meta model weights
         fast_weights = OrderedDict(model.named_parameters())
 
-        # Train the model for `inner_train_steps` iterations
         for inner_batch in range(inner_train_steps):
             # Perform update of model weights
             y = create_nshot_task_label(k_way, n_shot).to(device)
@@ -82,8 +78,7 @@ def meta_gradient_step(model: Module,
             else:
                 grad_list_inner=np.row_stack((grad_list_inner, gradients))
         
-        
-        # Do a pass of the model on the validation data from the current task
+
         y = create_nshot_task_label(k_way, q_queries).to(device)
         logits = model.functional_forward(x_task_val, fast_weights)
         loss = loss_fn(logits, y)
@@ -98,17 +93,11 @@ def meta_gradient_step(model: Module,
         gradients = torch.autograd.grad(loss, fast_weights.values(), create_graph=create_graph)
 
         
-        
 
         grad_list = np.row_stack((grad_list_inner, gradients))
-        # grad_inner_frac=grad_list[-1]+(-0.9*grad_list[-2])+(-0.0450*grad_list[-3])+(-0.0165*grad_list[-4])+(-0.008662*grad_list[-5])  ###frac=0.9    h=1
-        # grad_inner_frac=grad_list[-1]+(-0.482298*grad_list[-3])+(-0.0129228*grad_list[-5])    ###frac=0.9    h=2
-        # grad_inner_frac=grad_list[-1]+(-0.17411*grad_list[-3])+(-0.060628*grad_list[-5])   ###frac=0.2    h=2
-        # grad_inner_frac=grad_list[-1]+(-0.16054*grad_list[-3])+(-0.051551*grad_list[-5])   ###frac=0.2    h=3
-
 
         # FracMAML1   -0.1   1             result  1.24780425
-        # grad_inner_frac=(1*grad_list[-1])+0.1*grad_list[-2]+(0.055*grad_list[-3])+(0.0385*grad_list[-4])+(0.0298375*grad_list[-5])+(0.02446675*grad_list[-6])
+        grad_inner_frac=(1*grad_list[-1])+0.1*grad_list[-2]+(0.055*grad_list[-3])+(0.0385*grad_list[-4])+(0.0298375*grad_list[-5])+(0.02446675*grad_list[-6])
 
         # FracMAML2   -0.2    1          result    1.537436
         # grad_inner_frac=(1*grad_list[-1])+0.1999*grad_list[-2]+(0.12*grad_list[-3])+(0.088*grad_list[-4])+(0.0704*grad_list[-5])+(0.059136*grad_list[-6])
@@ -122,36 +111,7 @@ def meta_gradient_step(model: Module,
         # FracMAML5    -0.1   2          result          1.21775475
         # grad_inner_frac=(1*grad_list[-1])+0.1071773*grad_list[-2]+(0.0631784*grad_list[-4])+(0.04739905*grad_list[-6])
 
-        # FracMAML6    -0.4   1          result       2.2619309
-        # grad_inner_frac=(1*grad_list[-1])+(0.399999*grad_list[-2])+0.2799999*grad_list[-3]+(0.22399*grad_list[-4])+(0.19039*grad_list[-5])+(0.167552*grad_list[-6])
 
-
-        # FracMAML7    -0.3   2           result     1.94388
-        # grad_inner_frac=(1*grad_list[-1])+0.36934*grad_list[-2]+(0.295564*grad_list[-4])+(0.278976*grad_list[-6])
-
-
-        # FracMAML8    -0.1   3           result        1.180115
-        # grad_inner_frac=(1*grad_list[-1])+0.1116*grad_list[-2]+(0.068515*grad_list[-5])
-
-
-        # FracMAML9    -0.2   3              result        1.4353671
-        grad_inner_frac=(1*grad_list[-1])+0.2491461*grad_list[-2]+(0.186221*grad_list[-5])
-
-        # FracMAML10    -0.3   3              result      1.794086498
-        # grad_inner_frac=(1*grad_list[-1])+0.417116*grad_list[-2]+(0.376970498*grad_list[-5])
-
-
-
-        # FracMAML11    -0.05   1              result      1.10786484
-        # grad_inner_frac=grad_list[-1]+0.417116*grad_list[-2]+0.376970498*grad_list[-3]+0.417116*grad_list[-4]+0.376970498*grad_list[-5]+0.417116*grad_list[-6]
-
-
-
-
-        # grad_inner_frac=0.199999*grad_list[-1]+(0.12*grad_list[-2])+(0.088*grad_list[-3])+(0.0704*grad_list[-4])+(0.059136*grad_list[-5])+(0.05125*grad_list[-6])   ###frac=-0.2    h=1
-        
-        
-        # grad_inner_frac=grad_list[-1]      ###ceshi
         if index_meta_batch<=0:
             grad_list_final = grad_inner_frac
         else:
@@ -163,21 +123,7 @@ def meta_gradient_step(model: Module,
         
 
     sum_grads_pi=grad_list_final.mean(axis=0)
-
-
-    # grad_final1=sum_grads_pi
-        
-# 1
-# -0.9
-# -0.045000
-# -0.0165
-# -0.008662
-# -0.00537075
-# -0.0036700
-# -0.00267
-# -0.00203
- # -0.0016084
- # -0.00130280
+  
         
     if order == 1:
         if train:
