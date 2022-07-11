@@ -96,20 +96,24 @@ def meta_gradient_step(model: Module,
 
         grad_list = np.row_stack((grad_list_inner, gradients))
 
-        # FracMAML1   -0.1   1             result  1.24780425
+        # FracMAML   -0.1   1             result 
         grad_inner_frac=(1*grad_list[-1])+0.1*grad_list[-2]+(0.055*grad_list[-3])+(0.0385*grad_list[-4])+(0.0298375*grad_list[-5])+(0.02446675*grad_list[-6])
 
-        # FracMAML2   -0.2    1          result    1.537436
+        # FracMAML1   -0.2    1          result  
         # grad_inner_frac=(1*grad_list[-1])+0.1999*grad_list[-2]+(0.12*grad_list[-3])+(0.088*grad_list[-4])+(0.0704*grad_list[-5])+(0.059136*grad_list[-6])
 
-        # FracMAML3   -0.3    1            result     1.8739076
+        # FracMAML2   -0.3    1            result    
         # grad_inner_frac=(1*grad_list[-1])+(0.3*grad_list[-2])+0.195*grad_list[-3]+(0.1495*grad_list[-4])+(0.1233374*grad_list[-5])+(0.1060702*grad_list[-6])
 
-        # FracMAML4    -0.2    2           result    1.521453
+        # FracMAML3    -0.2    2           result    
         # grad_inner_frac=(1*grad_list[-1])+0.22973*grad_list[-2]+(0.15834*grad_list[-4])+(0.1333830*grad_list[-6])
 
-        # FracMAML5    -0.1   2          result          1.21775475
+        # FracMAML4    -0.1   2          result        
         # grad_inner_frac=(1*grad_list[-1])+0.1071773*grad_list[-2]+(0.0631784*grad_list[-4])+(0.04739905*grad_list[-6])
+
+
+        # FracMAML5    -0.1   3          result     
+        # grad_inner_frac=(1*grad_list[-1])+0.22322*grad_list[-4]
 
 
         if index_meta_batch<=0:
